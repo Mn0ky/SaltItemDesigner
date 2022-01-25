@@ -9,11 +9,15 @@ namespace SaltItemDesigner
 
         public string RarityName { get; set; }
 
+        public string RarityColorHex { get; set; }
+
         public ItemRarity(string rarityColorHex, string rarityName)
         {
+
             var rarityColorHexBytes = Convert.FromHexString(rarityColorHex.Remove(0, 1));
             RarityColor = new SolidColorBrush(Color.FromRgb(rarityColorHexBytes[0], rarityColorHexBytes[1], rarityColorHexBytes[2]));
             RarityName = rarityName;
+            RarityColorHex = rarityColorHex;
         }
     }
 }

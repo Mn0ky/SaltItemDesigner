@@ -20,8 +20,8 @@
 
         <Label Grid.Column="0" HorizontalContentAlignment="Center" FontSize="18">Item View</Label>
         <Label Grid.Column="1" HorizontalContentAlignment="Center" FontSize="18">Options</Label>
-    
-        
+
+
         <StackPanel Grid.Row="1">
             <StackPanel.Background>
                 <ImageBrush ImageSource="/Resources/invbackground.png" Stretch="None" />
@@ -45,7 +45,7 @@
                 <Button Margin="0,5,0,0" Height="23" Name="IconButton" Width="75" Click="IconButton_Click">
                     Item Icon...
                 </Button>
-                <ComboBox Name="ItemRarityComboBox" Height="25" Margin="8,3,0,0" SelectionChanged="ItemRarityComboBox_OnSelectionChanged"> 
+                <ComboBox Name="ItemRarityComboBox" Height="25" Margin="8,3,0,0" SelectionChanged="ItemRarityComboBox_OnSelectionChanged">
                     <ComboBox.ItemTemplate>
                         <DataTemplate>
                             <StackPanel Orientation="Horizontal">
@@ -76,7 +76,10 @@
                 </StackPanel>
             </WrapPanel>
             <WrapPanel Margin="0,85,0,0">
-                <Button Margin="0,5,0,0" Height="23" Name="ExportButton" Width="75" Click="ExportButton_Click">
+                <Button Margin="0,5,0,0" Height="23" Name="ImportButton" Width="75" Click="ImportButton_Click">
+                    Import Item...
+                </Button>
+                <Button Margin="5,5,0,0" Height="23" Name="ExportButton" Width="75" Click="ExportButton_Click">
                     Export Item...
                 </Button>
                 <Button Margin="8,5,0,0" Height="23" Name="BrowseButton" Width="81" Click="BrowseButton_Click">

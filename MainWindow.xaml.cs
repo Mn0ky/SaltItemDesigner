@@ -18,6 +18,8 @@ using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
 using System.Text.Json;
+using System.Text.Unicode;
+using System.Text.Encodings.Web;
 using Path = System.IO.Path;
 
 namespace SaltItemDesigner
@@ -30,7 +32,7 @@ namespace SaltItemDesigner
         public MainWindow()
         {
             InitializeComponent();
-            ObservableCollection<ItemRarity> rarityObjs = new ()
+            ObservableCollection<ItemRarity> rarityObjs = new()
             {
                 new ItemRarity("#FFFFFF", "Common"),
                 new ItemRarity("#5DA546", "Uncommon"),
@@ -66,10 +68,10 @@ namespace SaltItemDesigner
 
             if (dlg.ShowDialog() == true)
             {
-                var selectedFileName = dlg.FileName;
+                selectedIconFileName = dlg.FileName;
                 var bitmap = new BitmapImage();
                 bitmap.BeginInit();
-                bitmap.UriSource = new Uri(selectedFileName);
+                bitmap.UriSource = new Uri(selectedIconFileName);
                 bitmap.EndInit();
                 ItemIcon.Source = bitmap;
             }
@@ -80,43 +82,68 @@ namespace SaltItemDesigner
             Process.Start("explorer.exe", $"{_curDir}Items\\");
         }
 
+        private void ImportButton_Click(object sender, RoutedEventArgs e)
+        {
+            string itemsDir = $"{_curDir}Items\\";
+            if (!Directory.Exists(itemsDir)) Directory.CreateDirectory(itemsDir);
+
+            var dlg = new OpenFileDialog
+            {
+                InitialDirectory = itemsDir,
+                Filter = "JSON Files (*.json)|*.json",
+                RestoreDirectory = true
+            };
+
+            if (dlg.ShowDialog() == true)
+            {
+                ImportItemData(dlg.FileName);
+            }
+        }
+
+        private void ImportItemData(string filename)
+        {
+            string jsonEncoded = File.ReadAllText(filename);
+            ItemSaveable itemSaved = JsonSerializer.Deserialize<ItemSaveable>(jsonEncoded);
+            ItemRarity itemSavedRarity = new(itemSaved.ItemRarityColorHex, itemSaved.ItemRarityName);
+
+            TitleTextBox.Text = itemSaved.ItemTitle;
+            TitleTextBox.Foreground = itemSavedRarity.RarityColor;
+            FlareTextBox.Text = itemSaved.ItemFlareText;
+            GoldAmountBox.Text = itemSaved.ItemPrice;
+            Trace.WriteLine("Checking itemrarity");
+            for (var i = 0; i < ItemRarityComboBox.Items.Count; i++)
+            {
+                ItemRarity itemrarity = (ItemRarity)ItemRarityComboBox.Items[i];
+                if (itemrarity.RarityName == itemSavedRarity.RarityName && itemrarity.RarityColorHex == itemSavedRarity.RarityColorHex)
+                {
+                    Trace.WriteLine("itemraritycombox contains rarity object");
+                    Trace.WriteLine("index of item: " + ItemRarityComboBox.Items.IndexOf(itemSavedRarity)); // TODO: Figure out why index of/contains don't work.
+                    ItemRarityComboBox.SelectedIndex = i; // TODO: Implement custom rarity support.
+                }
+                
+            }
+            //ItemIcon.Source = //Base64ToImage();
+        }
+
         private void ExportButton_Click(object sender, RoutedEventArgs e)
         {
             string itemsDir = $"{_curDir}Items\\";
             if (!Directory.Exists(itemsDir)) Directory.CreateDirectory(itemsDir);
 
-            if (!string.IsNullOrEmpty(TitleTextBox.Text) && !string.IsNullOrEmpty(FlareTextBox.Text))
-            { 
+            if (!string.IsNullOrEmpty(TitleTextBox.Text) && !string.IsNullOrEmpty(FlareTextBox.Text) && !string.IsNullOrEmpty(selectedIconFileName))
+            {
+
                 var itemJson = JsonSerializer.Serialize(FetchItemValues());
                 Trace.WriteLine($"{_curDir}Items\\");
-                string[] folders = Directory.GetDirectories(itemsDir, "", SearchOption.TopDirectoryOnly);
-                Trace.WriteLine("folder length: " + folders.Length);
 
-                var dupeNamesFound = 0;
-                foreach (var dirPath in folders)
-                {
-                    Trace.WriteLine("checking: " + Path.GetFileName(dirPath));
-                    if (Path.GetFileName(dirPath) == TitleTextBox.Text)
-                    {
-                        // Duplicate item found, increasing folder suffix
-                        dupeNamesFound++;
-                    }
-                }
                 Trace.WriteLine(itemsDir);
-                if (dupeNamesFound > 0)
-                {
-                    Directory.CreateDirectory($"{itemsDir}{TitleTextBox.Text} ({dupeNamesFound})");
-                    File.WriteAllText($"{itemsDir}{TitleTextBox.Text} ({dupeNamesFound})\\{TitleTextBox.Text}.json", itemJson);
-                    System.Windows.MessageBox.Show("Item exported successfully.", "Export Success", MessageBoxButton.OK);
-                    return;
-                }
-                Directory.CreateDirectory($"{itemsDir}{TitleTextBox.Text}");
-                File.WriteAllText($"{itemsDir}{TitleTextBox.Text}\\{TitleTextBox.Text}.json", itemJson);
-                System.Windows.MessageBox.Show("Item exported successfully.", "Export Success", MessageBoxButton.OK);
+
+                File.WriteAllText($"{itemsDir}{TitleTextBox.Text}.json", itemJson);
+                MessageBox.Show("Item exported successfully.", "Export Success", MessageBoxButton.OK);
             }
             else
             {
-                System.Windows.MessageBox.Show("Unable to export item. Please check your fields and try again.", "Export Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                MessageBox.Show("Unable to export item. Please check your fields and or select an item icon before trying again.", "Export Error", MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
 
@@ -124,10 +151,22 @@ namespace SaltItemDesigner
         {
             if (e.AddedItems != null)
             {
-                var colorSelected = ((ItemRarity)e.AddedItems[0]).RarityName;
-                var colorBrushSelected = ((ItemRarity) e.AddedItems[0]).RarityColor;
+                Trace.WriteLine("raritycombobox selection changed.");
+                Trace.WriteLine("e length: " + e.AddedItems.Count);
+
+                var selectedItemRarity = (ItemRarity)e.AddedItems[0];
+                var colorSelected = selectedItemRarity.RarityName;
+                var colorBrushSelected = selectedItemRarity.RarityColor;
                 TitleTextBox.Foreground = colorBrushSelected;
                 Trace.WriteLine($"Color selected: {colorSelected}.");
+
+                if (ItemRarityComboBox.Items.Contains(selectedItemRarity))
+                {
+                    // Rarity value already exists in the combobox, assuming not custom. Setting it directly in case this was imported. 
+                    Trace.WriteLine("selectionchanged index: " + ItemRarityComboBox.Items.IndexOf(selectedItemRarity));
+                    ItemRarityComboBox.SelectedIndex = ItemRarityComboBox.Items.IndexOf(selectedItemRarity);
+                }
+                //if (ItemRarityComboBox.Items[ItemRarityComboBox.SelectedIndex].
             }
         }
 
@@ -138,11 +177,11 @@ namespace SaltItemDesigner
                 ["ItemTitle"] = TitleTextBox.Text,
                 ["ItemFlareText"] = FlareTextBox.Text,
                 ["ItemPrice"] = GoldAmountBox.Text,
-                ["ItemRarity"] = ((ItemRarity)ItemRarityComboBox.SelectedItem).RarityName,
-                ["ItemID"] = "10000" // TODO: Implement this.
+                ["ItemRarityName"] = ((ItemRarity)ItemRarityComboBox.SelectedItem).RarityName,
+                ["ItemRarityColorHex"] = ((ItemRarity)ItemRarityComboBox.SelectedItem).RarityColorHex,
+                ["ItemIcon"] = Convert.ToBase64String(File.ReadAllBytes(selectedIconFileName)) // TODO: Must check if icon exists before going through.
             };
         }
-        private readonly string _curDir = AppDomain.CurrentDomain.BaseDirectory;
 
         private void GoldUp_OnClick(object sender, RoutedEventArgs e)
         {
@@ -170,5 +209,9 @@ namespace SaltItemDesigner
             System.Windows.MessageBox.Show("Invalid gold amount. Please try entering a smaller number or a numeric value.", "Invalid Amount Error", MessageBoxButton.OK, MessageBoxImage.Error);
             GoldAmountBox.Text = "0";
         }
+
+        private readonly string _curDir = AppDomain.CurrentDomain.BaseDirectory;
+
+        private string selectedIconFileName;
     }
 }
