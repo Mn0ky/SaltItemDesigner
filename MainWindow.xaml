@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:SaltItemDesigner"
         mc:Ignorable="d"
-        Title="Salt Item Designer" Icon="/Resources/hammer-and-screwdriver-icon.ico" Height="430" Width="755">
+        Title="Salt Item Designer" Icon="/Resources/designerico.ico" Height="430" Width="755">
     <Grid Margin="15">
 
         <Grid.RowDefinitions>
@@ -82,7 +82,7 @@
                 <Button Margin="5,5,0,0" Height="23" Name="ExportButton" Width="75" Click="ExportButton_Click">
                     Export Item...
                 </Button>
-                <Button Margin="8,5,0,0" Height="23" Name="BrowseButton" Width="81" Click="BrowseButton_Click">
+                <Button Margin="0,5,0,0" Height="23" Name="BrowseButton" Width="81" Click="BrowseButton_Click">
                     Browse Items...
                 </Button>
             </WrapPanel>

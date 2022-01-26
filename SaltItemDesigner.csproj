@@ -9,14 +9,14 @@
 
   <ItemGroup>
     <None Remove="itemshade.png" />
-    <None Remove="Resources\hammer-and-screwdriver-icon.ico" />
+    <None Remove="Resources\designerico.ico" />
     <None Remove="Resources\InvBackground.png" />
     <None Remove="Resources\placeholdericon.png" />
     <None Remove="Resources\UglyQua.ttf" />
   </ItemGroup>
 
   <ItemGroup>
-    <Resource Include="Resources\hammer-and-screwdriver-icon.ico" />
+    <Resource Include="Resources\designerico.ico" />
     <Resource Include="Resources\invbackground.png" />
     <Resource Include="Resources\itemshade.png" />
     <Resource Include="Resources\placeholdericon.png" />

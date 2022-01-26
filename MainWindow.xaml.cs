@@ -3,31 +3,20 @@ using System.IO;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Collections.Specialized;
-using System.Linq;
-using System.Text;
 using Microsoft.Win32;
 using System.Diagnostics;
-using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
 using System.Windows.Input;
-using System.Windows.Media;
 using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
 using System.Text.Json;
-using System.Text.Unicode;
-using System.Text.Encodings.Web;
-using Path = System.IO.Path;
 
 namespace SaltItemDesigner
 {
     /// <summary>
     /// Interaction logic for MainWindow.xaml
     /// </summary>
-    public partial class MainWindow : Window // TODO: Implement ability to read in item file.
+    public partial class MainWindow : Window // TODO: Implement ability to read in item file FULLY, reorganize file structure.
     {
         public MainWindow()
         {
@@ -62,18 +51,18 @@ namespace SaltItemDesigner
             var dlg = new OpenFileDialog
             {
                 InitialDirectory = "c:\\",
-                Filter = "Image files (*.png;*.jpeg)|*.png;*.jpeg|All Files (*.*)|*.*",
+                Filter = "PNG Image Files (*.png)|*.png",
                 RestoreDirectory = true
             };
 
             if (dlg.ShowDialog() == true)
             {
-                selectedIconFileName = dlg.FileName;
                 var bitmap = new BitmapImage();
                 bitmap.BeginInit();
-                bitmap.UriSource = new Uri(selectedIconFileName);
+                bitmap.UriSource = new Uri(dlg.FileName);
                 bitmap.EndInit();
                 ItemIcon.Source = bitmap;
+                _curItemIcon = bitmap;
             }
         }
 
@@ -90,7 +79,7 @@ namespace SaltItemDesigner
             var dlg = new OpenFileDialog
             {
                 InitialDirectory = itemsDir,
-                Filter = "JSON Files (*.json)|*.json",
+                Filter = "Item Files (*.item)|*.item",
                 RestoreDirectory = true
             };
 
@@ -110,6 +99,9 @@ namespace SaltItemDesigner
             TitleTextBox.Foreground = itemSavedRarity.RarityColor;
             FlareTextBox.Text = itemSaved.ItemFlareText;
             GoldAmountBox.Text = itemSaved.ItemPrice;
+            ItemIcon.Source = itemSaved.ItemIconBitmapImage;
+            _curItemIcon = itemSaved.ItemIconBitmapImage;
+
             Trace.WriteLine("Checking itemrarity");
             for (var i = 0; i < ItemRarityComboBox.Items.Count; i++)
             {
@@ -122,24 +114,35 @@ namespace SaltItemDesigner
                 }
                 
             }
-            //ItemIcon.Source = //Base64ToImage();
         }
 
         private void ExportButton_Click(object sender, RoutedEventArgs e)
         {
-            string itemsDir = $"{_curDir}Items\\";
+            var itemsDir = $"{_curDir}Items\\";
+            Trace.WriteLine(itemsDir);
             if (!Directory.Exists(itemsDir)) Directory.CreateDirectory(itemsDir);
 
-            if (!string.IsNullOrEmpty(TitleTextBox.Text) && !string.IsNullOrEmpty(FlareTextBox.Text) && !string.IsNullOrEmpty(selectedIconFileName))
+            if (!string.IsNullOrEmpty(TitleTextBox.Text) && !string.IsNullOrEmpty(FlareTextBox.Text) && _curItemIcon != null)
             {
-
                 var itemJson = JsonSerializer.Serialize(FetchItemValues());
-                Trace.WriteLine($"{_curDir}Items\\");
 
-                Trace.WriteLine(itemsDir);
+                var dialog = new SaveFileDialog
+                {
+                    AddExtension = true,
+                    OverwritePrompt = true,
+                    CheckPathExists = true,
+                    DefaultExt = ".item",
+                    Filter = "Item files|*.item",
+                    InitialDirectory = itemsDir
+                };
+                var saveSuccess = dialog.ShowDialog();
 
-                File.WriteAllText($"{itemsDir}{TitleTextBox.Text}.json", itemJson);
-                MessageBox.Show("Item exported successfully.", "Export Success", MessageBoxButton.OK);
+                if (saveSuccess == true)
+                {
+                    Trace.WriteLine("Save success: " + dialog.FileName);
+                    File.WriteAllText(dialog.FileName, itemJson);
+                    MessageBox.Show("Item exported successfully.", "Export Success", MessageBoxButton.OK);
+                }
             }
             else
             {
@@ -179,8 +182,21 @@ namespace SaltItemDesigner
                 ["ItemPrice"] = GoldAmountBox.Text,
                 ["ItemRarityName"] = ((ItemRarity)ItemRarityComboBox.SelectedItem).RarityName,
                 ["ItemRarityColorHex"] = ((ItemRarity)ItemRarityComboBox.SelectedItem).RarityColorHex,
-                ["ItemIcon"] = Convert.ToBase64String(File.ReadAllBytes(selectedIconFileName)) // TODO: Must check if icon exists before going through.
+                ["ItemIcon"] = GetIconBase64()
             };
+        }
+
+        private string GetIconBase64()
+        {
+            var pngEncoder = new PngBitmapEncoder();
+
+            pngEncoder.Frames.Add(BitmapFrame.Create(_curItemIcon));
+            using (var imgStream = new MemoryStream())
+            {
+                pngEncoder.Save(imgStream);
+                imgStream.Seek(0, SeekOrigin.Begin);
+                return Convert.ToBase64String(imgStream.ToArray());
+            }
         }
 
         private void GoldUp_OnClick(object sender, RoutedEventArgs e)
@@ -212,6 +228,8 @@ namespace SaltItemDesigner
 
         private readonly string _curDir = AppDomain.CurrentDomain.BaseDirectory;
 
-        private string selectedIconFileName;
+        private string _selectedIconFileName;
+
+        private BitmapImage _curItemIcon = null;
     }
 }
