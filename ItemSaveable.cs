@@ -9,8 +9,6 @@ namespace SaltItemDesigner
     {
         private BitmapImage _itemIcon;
 
-        private string _itemIconBase64;
-
         public string ItemTitle { get; set; } = "";
 
         public string ItemFlareText { get; set; } = "";
@@ -29,11 +27,17 @@ namespace SaltItemDesigner
                 imgBitMap.CacheOption = BitmapCacheOption.OnLoad;
                 imgBitMap.EndInit();
 
-                ItemIconBitmapImage = imgBitMap;
+                _itemIcon = imgBitMap;
             }
         }
 
-        public BitmapImage ItemIconBitmapImage { get; set; }
+        public BitmapImage ItemIconBitmapImage
+        {
+            get
+            {
+                return _itemIcon;
+            }
+        }
 
         public string ItemRarityColorHex { get; set; } = "";
 

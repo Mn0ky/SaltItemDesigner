@@ -16,7 +16,7 @@ namespace SaltItemDesigner
     /// <summary>
     /// Interaction logic for MainWindow.xaml
     /// </summary>
-    public partial class MainWindow : Window // TODO: Implement ability to read in item file FULLY, reorganize file structure.
+    public partial class MainWindow : Window // TODO: Reorganize file structure.
     {
         public MainWindow()
         {
@@ -227,8 +227,6 @@ namespace SaltItemDesigner
         }
 
         private readonly string _curDir = AppDomain.CurrentDomain.BaseDirectory;
-
-        private string _selectedIconFileName;
 
         private BitmapImage _curItemIcon = null;
     }
