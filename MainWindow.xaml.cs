@@ -21,6 +21,7 @@ namespace SaltItemDesigner
         public MainWindow()
         {
             InitializeComponent();
+
             ObservableCollection<ItemRarity> rarityObjs = new()
             {
                 new ItemRarity("#FFFFFF", "Common"),
@@ -29,9 +30,18 @@ namespace SaltItemDesigner
                 new ItemRarity("#6A3173", "Epic"),
                 new ItemRarity("#D77700", "Legendary")
             };
+
             ItemRarityComboBox.ItemsSource = rarityObjs;
             ItemRarityComboBox.SelectedIndex = 1;
             rarityObjs.CollectionChanged += RarityObjs_Changed;
+
+            StatusEffect[] effectObjs =
+            {
+                new() { EffectType = "CritChance" },
+                new() { EffectType = "Strength" }
+            };
+
+            ItemStatusEffectsComboBox.ItemsSource = effectObjs;
         }
 
         private void RarityObjs_Changed(object sender, NotifyCollectionChangedEventArgs e)
@@ -214,7 +224,7 @@ namespace SaltItemDesigner
             bool isSuccessful = int.TryParse(amount, out var amountNum);
 
             if (isSuccessful) return upOrDown ? (amountNum + 1).ToString() : (amountNum - 1).ToString();
-            System.Windows.MessageBox.Show("Invalid gold amount. Please try entering a smaller number or a numeric value.", "Invalid Amount Error", MessageBoxButton.OK, MessageBoxImage.Error);
+            MessageBox.Show("Invalid gold amount. Please try entering a smaller number or a numeric value.", "Invalid Amount Error", MessageBoxButton.OK, MessageBoxImage.Error);
             return "0";
         }
 
@@ -222,8 +232,25 @@ namespace SaltItemDesigner
         {
             var isSuccessful = int.TryParse(GoldAmountBox.Text, out var num);
             if (isSuccessful) return;
-            System.Windows.MessageBox.Show("Invalid gold amount. Please try entering a smaller number or a numeric value.", "Invalid Amount Error", MessageBoxButton.OK, MessageBoxImage.Error);
+            MessageBox.Show("Invalid gold amount. Please try entering a smaller number or a numeric value.", "Invalid Amount Error", MessageBoxButton.OK, MessageBoxImage.Error);
             GoldAmountBox.Text = "0";
+        }
+
+        private void ItemTypeComboBox_OnSelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            ComboBoxItem selectedType = (ComboBoxItem)e.AddedItems[0];
+
+            if (selectedType.Content != null && selectedType.Content.ToString() != "N/A")
+            {
+                ItemStatusEffectsComboBox.IsEnabled = true;
+                return;
+            }
+            ItemStatusEffectsComboBox.IsEnabled = false;
+        }
+
+        private void ItemStatusEffects_OnSelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            throw new NotImplementedException();
         }
 
         private readonly string _curDir = AppDomain.CurrentDomain.BaseDirectory;
