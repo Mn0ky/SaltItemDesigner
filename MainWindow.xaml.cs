@@ -35,13 +35,39 @@ namespace SaltItemDesigner
             ItemRarityComboBox.SelectedIndex = 1;
             rarityObjs.CollectionChanged += RarityObjs_Changed;
 
-            StatusEffect[] effectObjs =
-            {
-                new() { EffectType = "CritChance" },
-                new() { EffectType = "Strength" }
+            string[] itemEffects = {
+                "Strength",
+                "MaxHealth",
+                "Health",
+                "Weight",
+                "MaxWeightSpeedReduction",
+                "MaxFood",
+                "CombatStaminaRegenRate",
+                "CombatStaminaRecoveryDuration",
+                "Armor",
+                "SlashArmor",
+                "PierceArmor",
+                "PickArmor",
+                "SpecialStamina",
+                "BluntArmor",
+                "HeatResist",
+                "ColdResist",
+                "CombatStamina",
+                "MaxCombatStamina",
+                "CritChance",
+                "CritMultiplier",
+                "ExplosionArmor",
+                "Stunned",
+                "Fishing",
+                "PoisonResistance",
+                "Adornment",
+                "WalkVolume",
+                "Concealment",
+                "TeleportCooldown"
             };
 
-            ItemStatusEffectsComboBox.ItemsSource = effectObjs;
+            ItemStatusEffectsComboBox.ItemsSource = itemEffects;
+            ItemStatusEffectsComboBox.SelectedIndex = 19;
         }
 
         private void RarityObjs_Changed(object sender, NotifyCollectionChangedEventArgs e)
@@ -109,8 +135,26 @@ namespace SaltItemDesigner
             TitleTextBox.Foreground = itemSavedRarity.RarityColor;
             FlareTextBox.Text = itemSaved.ItemFlareText;
             GoldAmountBox.Text = itemSaved.ItemPrice;
+
             ItemIcon.Source = itemSaved.ItemIconBitmapImage;
             _curItemIcon = itemSaved.ItemIconBitmapImage;
+
+            switch (itemSaved.ItemType)
+            {
+                case "Consumable":
+                    ItemTypeComboBox.SelectedIndex = 1;
+                    ItemStatusEffectsComboBox.SelectedIndex = ItemStatusEffectsComboBox.Items.IndexOf(itemSaved.ItemStatusEffect);
+                    EffectAmountBox.Text = itemSaved.ItemEffectAmount;
+                    break;
+                case "Wearable":
+                    Trace.WriteLine("wear");
+                    break;
+                default:
+                    ItemTypeComboBox.SelectedIndex = 0;
+                    ItemStatusEffectsComboBox.SelectedIndex = 19;
+                    EffectAmountBox.Text = "00";
+                    break;
+            }
 
             Trace.WriteLine("Checking itemrarity");
             for (var i = 0; i < ItemRarityComboBox.Items.Count; i++)
@@ -185,7 +229,7 @@ namespace SaltItemDesigner
 
         private Dictionary<string, string> FetchItemValues()
         {
-            return new Dictionary<string, string>
+            Dictionary<string, string> itemJson = new()
             {
                 ["ItemTitle"] = TitleTextBox.Text,
                 ["ItemFlareText"] = FlareTextBox.Text,
@@ -194,6 +238,24 @@ namespace SaltItemDesigner
                 ["ItemRarityColorHex"] = ((ItemRarity)ItemRarityComboBox.SelectedItem).RarityColorHex,
                 ["ItemIcon"] = GetIconBase64()
             };
+
+            switch (ItemTypeComboBox.Text)
+            {
+                case "Consumable":
+                    Trace.WriteLine("type is consumable");
+                    itemJson.Add("ItemType", "Consumable");
+                    itemJson.Add("ItemStatusEffect", ItemStatusEffectsComboBox.Text);
+                    itemJson.Add("ItemEffectAmount", EffectAmountBox.Text);
+                    break;
+                case "Wearable":
+                    Trace.WriteLine("Type is Wearable");
+                    break;
+                default:
+                    Trace.WriteLine("Item is non-special, N/A. Doing nothing.");
+                    break; 
+            }
+
+            return itemJson;
         }
 
         private string GetIconBase64()
@@ -228,6 +290,14 @@ namespace SaltItemDesigner
             return "0";
         }
 
+        private void EffectAmountBox_OnLostKeyboardFocus(object sender, KeyboardFocusChangedEventArgs e)
+        {
+            var isSuccessful = int.TryParse(EffectAmountBox.Text, out var num);
+            if (isSuccessful) return;
+            MessageBox.Show("Invalid effect amount. Please try entering a smaller number or a numeric value.", "Invalid Amount Error", MessageBoxButton.OK, MessageBoxImage.Error);
+            EffectAmountBox.Text = "0";
+        }
+
         private void GoldAmountBox_OnLostKeyboardFocus(object sender, KeyboardFocusChangedEventArgs e)
         {
             var isSuccessful = int.TryParse(GoldAmountBox.Text, out var num);
@@ -245,12 +315,16 @@ namespace SaltItemDesigner
                 ItemStatusEffectsComboBox.IsEnabled = true;
                 return;
             }
-            ItemStatusEffectsComboBox.IsEnabled = false;
+
+            if (selectedType.Content != null && selectedType.Content.ToString() == "N/A")
+            {
+                ItemStatusEffectsComboBox.IsEnabled = false;
+            }
         }
 
         private void ItemStatusEffects_OnSelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            throw new NotImplementedException();
+            Trace.WriteLine("Itemstatuseff box selected");
         }
 
         private readonly string _curDir = AppDomain.CurrentDomain.BaseDirectory;

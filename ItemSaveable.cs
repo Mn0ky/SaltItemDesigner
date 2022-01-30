@@ -15,6 +15,12 @@ namespace SaltItemDesigner
 
         public string ItemPrice { get; set; } = "";
 
+        public string ItemType { get; set; } = "";
+
+        public string ItemStatusEffect { get; set; } = "";
+
+        public string ItemEffectAmount { get; set; } = "";
+
         public string ItemIcon
         {
             set
