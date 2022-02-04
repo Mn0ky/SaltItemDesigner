@@ -10,6 +10,7 @@ using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media.Imaging;
 using System.Text.Json;
+using System.Windows.Media;
 
 namespace SaltItemDesigner
 {
@@ -96,9 +97,18 @@ namespace SaltItemDesigner
                 var bitmap = new BitmapImage();
                 bitmap.BeginInit();
                 bitmap.UriSource = new Uri(dlg.FileName);
+                //bitmap.CreateOptions = BitmapCreateOptions.PreservePixelFormat;
+                bitmap.DecodePixelWidth = 64;
+                bitmap.DecodePixelHeight = 64;
                 bitmap.EndInit();
+                bitmap.Freeze();
+
+                //var scale = 64d / bitmap.PixelWidth;
+                //var bitmapResized = new WriteableBitmap(new TransformedBitmap(bitmap, new ScaleTransform(scale, scale)));
+                //var bitmapResized = new WriteableBitmap(bitmap);
                 ItemIcon.Source = bitmap;
                 _curItemIcon = bitmap;
+                _curItemIcon.Freeze();
             }
         }
 

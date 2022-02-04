@@ -30,20 +30,21 @@ namespace SaltItemDesigner
                 BitmapImage imgBitMap = new BitmapImage();
                 imgBitMap.BeginInit();
                 imgBitMap.StreamSource = new MemoryStream(imgData);
-                imgBitMap.CacheOption = BitmapCacheOption.OnLoad;
+                imgBitMap.DecodePixelHeight = 64;
+                imgBitMap.DecodePixelWidth = 64;
                 imgBitMap.EndInit();
+                imgBitMap.Freeze();
+
+                //var scale = 64d / imgBitMap.PixelWidth;
+                //var imgBitMapResized = new WriteableBitmap(new TransformedBitmap(imgBitMap, new ScaleTransform(scale, scale)));
+                //var imgBitMapResized = new WriteableBitmap(imgBitMap);
+
 
                 _itemIcon = imgBitMap;
             }
         }
 
-        public BitmapImage ItemIconBitmapImage
-        {
-            get
-            {
-                return _itemIcon;
-            }
-        }
+        public BitmapImage ItemIconBitmapImage => _itemIcon;
 
         public string ItemRarityColorHex { get; set; } = "";
 
