@@ -94,20 +94,19 @@ namespace SaltItemDesigner
 
             if (dlg.ShowDialog() == true)
             {
-                var bitmap = new BitmapImage();
-                bitmap.BeginInit();
-                bitmap.UriSource = new Uri(dlg.FileName);
+                _curItemIcon = new BitmapImage();
+                _curItemIcon.BeginInit();
+                _curItemIcon.UriSource = new Uri(dlg.FileName);
                 //bitmap.CreateOptions = BitmapCreateOptions.PreservePixelFormat;
-                bitmap.DecodePixelWidth = 64;
-                bitmap.DecodePixelHeight = 64;
-                bitmap.EndInit();
-                bitmap.Freeze();
+                _curItemIcon.DecodePixelWidth = 64;
+                _curItemIcon.DecodePixelHeight = 64;
+                _curItemIcon.EndInit();
+                _curItemIcon.Freeze();
 
                 //var scale = 64d / bitmap.PixelWidth;
                 //var bitmapResized = new WriteableBitmap(new TransformedBitmap(bitmap, new ScaleTransform(scale, scale)));
                 //var bitmapResized = new WriteableBitmap(bitmap);
-                ItemIcon.Source = bitmap;
-                _curItemIcon = bitmap;
+                ItemIcon.Source = _curItemIcon;
                 _curItemIcon.Freeze();
             }
         }
