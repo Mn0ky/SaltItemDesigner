@@ -27,20 +27,17 @@ namespace SaltItemDesigner
             {
                 byte[] imgData = Convert.FromBase64String(value);
 
-                BitmapImage imgBitMap = new BitmapImage();
-                imgBitMap.BeginInit();
-                imgBitMap.StreamSource = new MemoryStream(imgData);
-                imgBitMap.DecodePixelHeight = 64;
-                imgBitMap.DecodePixelWidth = 64;
-                imgBitMap.EndInit();
-                imgBitMap.Freeze();
+                _itemIcon = new BitmapImage();
+                _itemIcon.BeginInit();
+                _itemIcon.StreamSource = new MemoryStream(imgData);
+                _itemIcon.DecodePixelHeight = 64;
+                _itemIcon.DecodePixelWidth = 64;
+                _itemIcon.EndInit();
+                _itemIcon.Freeze();
 
                 //var scale = 64d / imgBitMap.PixelWidth;
                 //var imgBitMapResized = new WriteableBitmap(new TransformedBitmap(imgBitMap, new ScaleTransform(scale, scale)));
                 //var imgBitMapResized = new WriteableBitmap(imgBitMap);
-
-
-                _itemIcon = imgBitMap;
             }
         }
 
