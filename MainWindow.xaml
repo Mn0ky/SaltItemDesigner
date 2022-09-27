@@ -32,11 +32,11 @@
                 </StackPanel.Background>
                 <Image Name="ItemIcon" Height="64" Width="64" HorizontalAlignment="Left" Source="/Resources/placeholdericon.png" />
                 <TextBox Name="TitleTextBox" Height="55" Width="325" FontSize="17.5" MaxLength="250" VerticalContentAlignment="Center" BorderThickness="0" Style="{StaticResource UglyQua}" Foreground="#5DA546" Background="Transparent"
-                    Text="Click to Edit">
+                    Text="Click to Edit" LostKeyboardFocus="TitleTextBox_OnLostKeyboardFocus">
                 </TextBox>
             </StackPanel>
             <TextBox Name="FlareTextBox" Height="55" Width="375" FontSize="14" Style="{StaticResource UglyQua}" Foreground="White" TextWrapping="Wrap" Margin="0,8,16,0" Background="Transparent" BorderThickness="0"
-                Text="Some funky placeholder text. Feel free to edit.">
+                Text="Some funky placeholder text. Feel free to edit." LostKeyboardFocus="FlareTextBox_OnLostKeyboardFocus">
             </TextBox>
         </StackPanel>
 
@@ -49,7 +49,7 @@
                     <ComboBox.ItemTemplate>
                         <DataTemplate>
                             <StackPanel Orientation="Horizontal">
-                                <Rectangle Fill="{Binding RarityColor}" Width="16" Height="16" Margin="0,2,5,2" Stroke="Black" StrokeDashArray="1 2" />
+                                <Rectangle Fill="{Binding RarityColorBrush}" Width="16" Height="16" Margin="0,2,5,2" Stroke="Black" StrokeDashArray="1 2" />
                                 <TextBlock Text="{Binding RarityName}" />
                             </StackPanel>
                         </DataTemplate>

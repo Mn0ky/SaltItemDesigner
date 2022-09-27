@@ -1,22 +1,45 @@
 ﻿using System;
 using System.Windows.Media;
 
-namespace SaltItemDesigner
+namespace SaltItemDesigner;
+
+[Serializable]
+public class ItemRarity
 {
-    class ItemRarity
+    [field: NonSerialized] public SolidColorBrush RarityColorBrush { get; private set; }
+    public string RarityName { get; }
+    public string RarityColorHex { get; }
+
+    public ItemRarity(string rarityColorHex, string rarityName)
     {
-        public SolidColorBrush RarityColor { get; set; }
+        var rarityColorHexBytes = Convert.FromHexString(rarityColorHex);
 
-        public string RarityName { get; set; }
+        RarityColorBrush = new SolidColorBrush(Color.FromRgb(rarityColorHexBytes[0],
+            rarityColorHexBytes[1],
+            rarityColorHexBytes[2]));
+        
+        RarityName = rarityName;
+        RarityColorHex = rarityColorHex;
+    }
 
-        public string RarityColorHex { get; set; }
+    public override bool Equals(object obj)
+    {
+        if (obj == null) throw new ArgumentNullException(nameof(obj));
+        if (!(GetType() == obj.GetType())) return false;
+        
+        var comparedRarity = obj as ItemRarity;
+        
+        return comparedRarity!.RarityName == RarityName &&
+               comparedRarity.RarityColorHex == RarityColorHex &&
+               comparedRarity.RarityColorBrush.Color == RarityColorBrush.Color;
+    }   
 
-        public ItemRarity(string rarityColorHex, string rarityName)
-        {
-            var rarityColorHexBytes = Convert.FromHexString(rarityColorHex.Remove(0, 1));
-            RarityColor = new SolidColorBrush(Color.FromRgb(rarityColorHexBytes[0], rarityColorHexBytes[1], rarityColorHexBytes[2]));
-            RarityName = rarityName;
-            RarityColorHex = rarityColorHex;
-        }
+    public void GenerateColorBrush()
+    {
+        var rarityColorHexBytes = Convert.FromHexString(RarityColorHex);
+        
+        RarityColorBrush = new SolidColorBrush(Color.FromRgb(rarityColorHexBytes[0],
+            rarityColorHexBytes[1],
+            rarityColorHexBytes[2]));
     }
 }
